@@ -46,7 +46,15 @@ class RecentCommitsView(BaseView):
     def refresh_table(self) -> None:
         """Refresh the table with current data."""
         self.table.clear()
+        print("refreshing table")
+        print(self.data)
         for commit in self.data:
+            # verify that the table already has the 4 required columns
+            if len(self.table.columns) != 4:
+                print("table does not have 4 columns")
+                print(self.table.columns)
+                continue
+
             self.table.add_row(
                 commit.hash[:8],  # Truncate hash to 8 characters
                 commit.author,
