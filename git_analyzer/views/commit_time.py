@@ -11,6 +11,9 @@ class CommitTimeView(BaseView):
 
     title = reactive("Commits by Hour")
     data = reactive({})
+    git_command = reactive(
+        "git log --format='%H|%aI' | awk -F'|' '{split($2,dt,\"T\"); split(dt[2],tm,\":\"); print tm[1]}'"
+    )
 
     DEFAULT_CSS = """
     CommitTimeView {

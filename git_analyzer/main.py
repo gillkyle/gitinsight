@@ -22,10 +22,12 @@ class StatusPanel(Static):
         super().__init__()
         self.repo_info = Static("Repository: Not connected")
         self.status = Static("Status: Initializing...")
+        self.git_command = Static("Git Command: None")
 
     def compose(self) -> ComposeResult:
         yield self.repo_info
         yield self.status
+        yield self.git_command
 
     def update_repo_info(self, path: str) -> None:
         self.repo_info.update(f"Repository: {os.path.abspath(path)}")
@@ -33,25 +35,35 @@ class StatusPanel(Static):
     def update_status(self, message: str) -> None:
         self.status.update(f"Status: {message}")
 
+    def update_git_command(self, command: str) -> None:
+        self.git_command.update(f"Git Command: {command}")
+
 
 class GitAnalyzerApp(App):
     """Main application for analyzing git repositories."""
 
     BINDINGS = [
-        Binding("left", "previous_tab", "Previous tab", show=True, key_display="←"),
-        Binding("right", "next_tab", "Next tab", show=True, key_display="→"),
         Binding("q", "quit", "Quit", show=True),
+        Binding("l", "previous_tab", "Previous", show=True, key_display="←"),
+        Binding("r", "next_tab", "Next", show=True, key_display="→"),
     ]
 
     CSS = """
     StatusPanel {
         width: 100%;
         height: auto;
-        background: $primary;
+        background: $surface;
         color: $text;
         border: solid $primary;
         padding: 1;
         margin-bottom: 1;
+    }
+
+    StatusPanel Static {
+        width: 100%;
+        height: auto;
+        margin: 0;
+        padding: 0;
     }
 
     Tabs {
@@ -193,6 +205,7 @@ class GitAnalyzerApp(App):
         view.add_class("view")
         content_container.mount(view)
         await view.load_data(self.git_data)
+        self.status_panel.update_git_command(view.git_command)
 
     async def on_tabs_tab_activated(self, event) -> None:
         """Handle tab activation events."""

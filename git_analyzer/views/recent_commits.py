@@ -11,6 +11,7 @@ class RecentCommitsView(BaseView):
 
     title = reactive("Recent Commits")
     data = reactive([])
+    git_command = reactive("git log --format='%H|%an|%aI|%s' -n 20")
 
     DEFAULT_CSS = """
     RecentCommitsView {

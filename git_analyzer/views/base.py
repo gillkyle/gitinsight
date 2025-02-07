@@ -9,6 +9,7 @@ class BaseView(Static):
 
     title = reactive("Unnamed View")
     is_loading = reactive(False)
+    git_command = reactive("No git command available")
 
     DEFAULT_CSS = """
     BaseView {

@@ -11,6 +11,7 @@ class AuthorCommitsView(BaseView):
 
     title = reactive("Commits by Author")
     data = reactive({})
+    git_command = reactive("git shortlog -sn --all")
 
     DEFAULT_CSS = """
     AuthorCommitsView {
@@ -76,15 +77,10 @@ class AuthorCommitsView(BaseView):
             x_positions = [float(x) for x in range(len(authors))]
 
             # Plot the bars
-            plt.bar(x_positions, counts, width=0.8)
+            plt.bar(x_positions, counts, width=0.6)
 
             # Set x-axis labels (authors)
             plt.xticks(x_positions, authors)
-
-            # Add value labels on top of bars
-            for i, count in enumerate(counts):
-                if count > 0:
-                    plt.text(str(count), float(i), float(count) + 0.5)
 
         self.plot_widget.refresh()
 
