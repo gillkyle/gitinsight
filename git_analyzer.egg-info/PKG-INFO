@@ -1,0 +1,10 @@
+Metadata-Version: 2.2
+Name: git-analyzer
+Version: 0.1.0
+Summary: A TUI git repository analyzer
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: textual>=0.47.1
+Requires-Dist: gitpython>=3.1.40
+Requires-Dist: click>=8.1.7
+Requires-Dist: textual-plotext>=0.2.1

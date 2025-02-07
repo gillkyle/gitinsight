@@ -1,0 +1,4 @@
+textual>=0.47.1
+gitpython>=3.1.40
+click>=8.1.7
+textual-plotext>=0.2.1

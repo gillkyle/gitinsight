@@ -1,5 +1,5 @@
 [project]
-name = "gitinsight"
+name = "git-analyzer"
 version = "0.1.0"
 description = "A TUI git repository analyzer"
 readme = "README.md"
@@ -9,8 +9,8 @@ dependencies = [
     "gitpython>=3.1.40",
     "click>=8.1.7",
     "textual-plotext>=0.2.1",
-    "textual-dev>=1.6.1",
 ]
 
 [project.scripts]
-gitinsight = "main:main"
+git-analyzer = "git_analyzer.main:main"
+git-analyzer-dev = "textual run --dev git_analyzer.main:main"

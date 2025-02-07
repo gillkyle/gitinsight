@@ -1,0 +1,16 @@
+README.md
+pyproject.toml
+git_analyzer/__init__.py
+git_analyzer/git_data.py
+git_analyzer/main.py
+git_analyzer.egg-info/PKG-INFO
+git_analyzer.egg-info/SOURCES.txt
+git_analyzer.egg-info/dependency_links.txt
+git_analyzer.egg-info/entry_points.txt
+git_analyzer.egg-info/requires.txt
+git_analyzer.egg-info/top_level.txt
+git_analyzer/views/__init__.py
+git_analyzer/views/author_commits.py
+git_analyzer/views/base.py
+git_analyzer/views/commit_time.py
+git_analyzer/views/recent_commits.py
