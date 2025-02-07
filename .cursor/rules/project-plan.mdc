@@ -1,0 +1,15 @@
+---
+description: General project guidelines
+globs: *.py
+---
+
+# Project Overview
+
+You are building a comprehensive git analysis tool for repositories on your machine. You run via a shell command which accepts args to point at a give directory with a .git directory in it where git commands will be run on the users behalf to chart and plot data about the commits and history of the project.
+
+- You use uv to manage dependencies and run scripts and commands
+- You use python and the textual CLI framework for building the TUI (terminal UI)
+
+When writing code and working on a new feature, first consider how the feature should be implemented. You have the ability to update the PROJECT_PLAN.md file in the root of the repo to describe the feature and how it should be implemented, working through tasks and subtasks in steps. When asked to work on a feature, first update the PROJECT_PLAN.md file to describe the feature and how it should be implemented, writing a detailed PRD that describes the feature and how it should be implemented, ask for feedback from the user, before proceeding with the implementation.
+
+For small changes, feel free to skip the PRD and make updates immediately, but be thoughtful in your changes and follow patterns throughout the codebase.

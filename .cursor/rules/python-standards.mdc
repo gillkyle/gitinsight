@@ -1,0 +1,11 @@
+---
+description: Python code conventions
+globs: *.py
+---
+
+# Python standards
+
+- Always use type hints
+- Use modern python language practices
+- Write readable, simple code with DRY modular functions
+- Write detailed doc strings and document so intellisense is helpful in editors

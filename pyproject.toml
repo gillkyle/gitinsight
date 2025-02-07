@@ -1,0 +1,16 @@
+[project]
+name = "gitinsight"
+version = "0.1.0"
+description = "A TUI git repository analyzer"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "textual>=0.47.1",
+    "gitpython>=3.1.40",
+    "click>=8.1.7",
+    "textual-plotext>=0.2.1",
+    "textual-dev>=1.6.1",
+]
+
+[project.scripts]
+gitinsight = "main:main"
