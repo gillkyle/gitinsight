@@ -21,13 +21,13 @@ class StatusPanel(Static):
     def __init__(self):
         super().__init__()
         self.repo_info = Static("Repository: Not connected")
-        self.status = Static("Status: Initializing...")
         self.git_command = Static("Git Command: None")
+        self.status = Static("Status: Initializing...")
 
     def compose(self) -> ComposeResult:
         yield self.repo_info
-        yield self.status
         yield self.git_command
+        yield self.status
 
     def update_repo_info(self, path: str) -> None:
         self.repo_info.update(f"Repository: {os.path.abspath(path)}")
@@ -200,7 +200,7 @@ class GitAnalyzerApp(App):
         content_container.remove_children()
 
         # Create and mount new view
-        view_class, _ = self.VIEWS[key]
+        view_class, label = self.VIEWS[key]
         view = view_class()
         view.add_class("view")
         content_container.mount(view)
@@ -212,7 +212,7 @@ class GitAnalyzerApp(App):
         tab_id = event.tab.id
         if tab_id:
             await self._show_view(tab_id)
-            self.status_panel.update_status(f"Viewing {event.tab.label}")
+            self.status_panel.update_status(f"viewing {event.tab.label}")
 
     async def action_previous_tab(self) -> None:
         """Switch to the previous tab."""
