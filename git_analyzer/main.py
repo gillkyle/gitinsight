@@ -5,12 +5,12 @@ import os
 
 import click
 from textual.app import App, ComposeResult
-from textual.containers import Container, Horizontal, Vertical
-from textual.widgets import Button, Footer, Header, Static
+from textual.binding import Binding
+from textual.containers import Container, Vertical
+from textual.widgets import Footer, Header, Static, Tab, Tabs
 
 from .git_data import GitDataManager
 from .views.author_commits import AuthorCommitsView
-from .views.base import BaseView
 from .views.commit_time import CommitTimeView
 from .views.recent_commits import RecentCommitsView
 
@@ -37,42 +37,85 @@ class StatusPanel(Static):
 class GitAnalyzerApp(App):
     """Main application for analyzing git repositories."""
 
+    BINDINGS = [
+        Binding("left", "previous_tab", "Previous tab", show=True, key_display="←"),
+        Binding("right", "next_tab", "Next tab", show=True, key_display="→"),
+        Binding("q", "quit", "Quit", show=True),
+    ]
+
     CSS = """
     StatusPanel {
         width: 100%;
         height: auto;
-        background: $surface;
+        background: $primary;
         color: $text;
         border: solid $primary;
         padding: 1;
         margin-bottom: 1;
     }
 
-    #navigation {
+    Tabs {
         width: 100%;
-        height: auto;
-        background: $surface;
+        height: 3;  /* Fixed height for tabs */
+        background: $boost;
+        border-bottom: solid $primary;
+    }
+
+    Tabs > .tab-list {
+        height: 100%;
+        background: $boost;
         color: $text;
-        border: solid $primary;
-        padding: 1;
-        margin-bottom: 1;
     }
 
-    Button {
+    Tabs > .tab-list > Tab {
         margin: 0 1;
+        padding: 0 2;
+        height: 100%;
+        text-style: bold;
+        background: $panel;
+        color: $text;
+        border: tall $primary;
     }
 
-    Button:hover {
-        background: $accent;
+    Tab:hover {
+        background: $accent-darken-1;
     }
 
-    Button.selected {
+    Tab.-active {
         background: $accent;
+        color: $text;
+        text-style: bold;
+        border-bottom: none;
+    }
+
+    Footer {
+        background: $boost;
+        color: $text;
+        padding: 0 1;
+    }
+
+    Footer > .footer--key {
+        text-style: bold;
+        background: $primary;
+        color: $text;
+    }
+
+    Footer > .footer--highlight {
+        background: $primary;
+        color: $text;
     }
 
     #main-content {
         width: 100%;
-        height: 1fr;
+        height: 100%;
+        layout: grid;
+        grid-size: 1;
+        grid-rows: auto auto 1fr;  /* Status panel, tabs, and content */
+    }
+
+    #tab-content {
+        width: 100%;
+        height: 100%;
     }
 
     .view {
@@ -96,7 +139,6 @@ class GitAnalyzerApp(App):
         self.repo_path = repo_path
         self.git_data = GitDataManager(repo_path)
         self.status_panel = StatusPanel()
-        self.current_view: BaseView | None = None
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
@@ -104,13 +146,11 @@ class GitAnalyzerApp(App):
         yield Container(
             Vertical(
                 self.status_panel,
-                Horizontal(
-                    *[
-                        Button(label, id=f"view-{key}", classes="nav-button")
-                        for key, (_, label) in self.VIEWS.items()
-                    ],
-                    id="navigation",
+                Tabs(
+                    *[Tab(label, id=key) for key, (_, label) in self.VIEWS.items()],
+                    id="tabs",
                 ),
+                Container(id="tab-content"),
                 id="main-content",
             )
         )
@@ -123,8 +163,12 @@ class GitAnalyzerApp(App):
             self.status_panel.update_status("Connecting to repository...")
             self.git_data.connect()
             self.status_panel.update_status("Connected successfully!")
-            # Switch to the first view by default
-            await self.switch_view("time")
+
+            # Create and mount the first view
+            first_key = next(iter(self.VIEWS.keys()))
+            await self._show_view(first_key)
+
+            self.status_panel.update_status("View loaded successfully!")
         except ValueError as e:
             error_msg = str(e)
             self.status_panel.update_status(f"Error: {error_msg}")
@@ -134,49 +178,38 @@ class GitAnalyzerApp(App):
             self.status_panel.update_status(error_msg)
             self.notify(error_msg, severity="error")
 
-    async def switch_view(self, view_key: str) -> None:
-        """Switch to a different view."""
-        if view_key not in self.VIEWS:
+    async def _show_view(self, key: str) -> None:
+        """Show the view for the given key."""
+        if key not in self.VIEWS:
             return
 
-        # Clear the current view if it exists
-        if self.current_view is not None:
-            self.current_view.remove()
+        # Clear current content
+        content_container = self.query_one("#tab-content")
+        content_container.remove_children()
 
-        # Create and mount the new view
-        view_class, _ = self.VIEWS[view_key]
-        new_view = view_class()
-        new_view.add_class("view")
-        self.current_view = new_view
+        # Create and mount new view
+        view_class, _ = self.VIEWS[key]
+        view = view_class()
+        view.add_class("view")
+        content_container.mount(view)
+        await view.load_data(self.git_data)
 
-        # Add the view to the main content area
-        main_content = self.query_one("#main-content")
-        main_content.mount(new_view)
+    async def on_tabs_tab_activated(self, event) -> None:
+        """Handle tab activation events."""
+        tab_id = event.tab.id
+        if tab_id:
+            await self._show_view(tab_id)
+            self.status_panel.update_status(f"Viewing {event.tab.label}")
 
-        # Update button states
-        for button in self.query(".nav-button"):
-            button.remove_class("selected")
-        self.query_one(f"#view-{view_key}").add_class("selected")
+    async def action_previous_tab(self) -> None:
+        """Switch to the previous tab."""
+        tabs = self.query_one(Tabs)
+        tabs.action_previous_tab()
 
-        # Load data for the new view
-        try:
-            self.status_panel.update_status("Loading data...")
-            await new_view.load_data(self.git_data)
-            self.status_panel.update_status("Data loaded successfully!")
-        except ValueError as e:
-            error_msg = str(e)
-            self.status_panel.update_status(f"Error: {error_msg}")
-            self.notify(error_msg, severity="error")
-        except Exception as e:
-            error_msg = f"Unexpected error: {str(e)}"
-            self.status_panel.update_status(error_msg)
-            self.notify(error_msg, severity="error")
-
-    async def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle button press events."""
-        if event.button.id and event.button.id.startswith("view-"):
-            view_key = event.button.id.replace("view-", "")
-            await self.switch_view(view_key)
+    async def action_next_tab(self) -> None:
+        """Switch to the next tab."""
+        tabs = self.query_one(Tabs)
+        tabs.action_next_tab()
 
 
 @click.command()

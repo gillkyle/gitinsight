@@ -10,6 +10,21 @@ class BaseView(Static):
     title = reactive("Unnamed View")
     is_loading = reactive(False)
 
+    DEFAULT_CSS = """
+    BaseView {
+        width: 100%;
+        height: 100%;
+    }
+
+    .loading-indicator {
+        width: auto;
+        height: auto;
+        padding: 1;
+        background: $primary;
+        color: $text;
+    }
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.loading_indicator = Static("Loading...", classes="loading-indicator")
@@ -19,7 +34,7 @@ class BaseView(Static):
         """React to loading state changes."""
         self.loading_indicator.display = value
 
-    async def load_data(self) -> None:
+    async def load_data(self, git_data) -> None:
         """Load data for the view. Should be implemented by subclasses."""
         raise NotImplementedError
 

@@ -12,6 +12,18 @@ class RecentCommitsView(BaseView):
     title = reactive("Recent Commits")
     data = reactive([])
 
+    DEFAULT_CSS = """
+    RecentCommitsView {
+        width: 100%;
+        height: 100%;
+    }
+
+    DataTable {
+        width: 100%;
+        height: 100%;
+    }
+    """
+
     def __init__(self):
         super().__init__()
         self.table = DataTable()
@@ -35,10 +47,10 @@ class RecentCommitsView(BaseView):
         self.table.clear()
         for commit in self.data:
             self.table.add_row(
-                commit.hash,
+                commit.hash[:8],  # Truncate hash to 8 characters
                 commit.author,
                 commit.date.strftime("%Y-%m-%d %H:%M"),
-                commit.message,
+                commit.message.split("\n")[0],  # Only show first line of message
             )
 
     async def load_data(self, git_data) -> None:

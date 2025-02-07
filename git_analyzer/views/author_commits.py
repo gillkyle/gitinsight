@@ -12,6 +12,18 @@ class AuthorCommitsView(BaseView):
     title = reactive("Commits by Author")
     data = reactive({})
 
+    DEFAULT_CSS = """
+    AuthorCommitsView {
+        width: 100%;
+        height: 100%;
+    }
+
+    PlotextPlot {
+        width: 100%;
+        height: 100%;
+    }
+    """
+
     def __init__(self):
         super().__init__()
         self.plot_widget = PlotextPlot()
@@ -32,11 +44,21 @@ class AuthorCommitsView(BaseView):
         """Handle the mount event."""
         self.plot()
 
+    async def on_resize(self, event) -> None:
+        """Handle resize events to update the plot size."""
+        self.plot()
+
     def plot(self) -> None:
         """Plot the author commit data."""
         plt = self.plot_widget.plt
         plt.clear_figure()
         plt.theme("dark")
+
+        # Set the plot size based on container size
+        available_width = max(10, self.size.width - 2)  # Minimum width of 10
+        available_height = max(10, self.size.height - 2)  # Minimum height of 10
+        plt.plotsize(available_width, available_height)
+
         plt.title(self.title)
         plt.xlabel("Author")
         plt.ylabel("Number of Commits")

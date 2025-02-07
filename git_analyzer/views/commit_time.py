@@ -12,6 +12,18 @@ class CommitTimeView(BaseView):
     title = reactive("Commits by Hour")
     data = reactive({})
 
+    DEFAULT_CSS = """
+    CommitTimeView {
+        width: 100%;
+        height: 100%;
+    }
+
+    PlotextPlot {
+        width: 100%;
+        height: 100%;
+    }
+    """
+
     def __init__(self):
         super().__init__()
         self.plot_widget = PlotextPlot()
@@ -32,11 +44,21 @@ class CommitTimeView(BaseView):
         """Handle the mount event."""
         self.plot()
 
+    async def on_resize(self, event) -> None:
+        """Handle resize events to update the plot size."""
+        self.plot()
+
     def plot(self) -> None:
         """Plot the commit time data."""
         plt = self.plot_widget.plt
         plt.clear_figure()
         plt.theme("dark")
+
+        # Set the plot size based on container size
+        available_width = max(10, self.size.width - 2)  # Minimum width of 10
+        available_height = max(10, self.size.height - 2)  # Minimum height of 10
+        plt.plotsize(available_width, available_height)
+
         plt.title(self.title)
         plt.xlabel("Hour (24h format)")
         plt.ylabel("Number of Commits")
@@ -52,17 +74,12 @@ class CommitTimeView(BaseView):
             x_positions = [float(x) for x in hours]
 
             # Plot the bars
-            plt.bar(x_positions, counts, width=0.8)
+            plt.bar(x_positions, counts, width=0.5)
 
             # Set x-axis ticks for every 3 hours
             tick_positions = [float(x) for x in range(0, 24, 3)]
             tick_labels = [str(h) for h in range(0, 24, 3)]
             plt.xticks(tick_positions, tick_labels)
-
-            # Add value labels on top of bars
-            for hour, count in enumerate(counts):
-                if count > 0:
-                    plt.text(str(count), float(hour), float(count) + 0.5)
 
         self.plot_widget.refresh()
 
